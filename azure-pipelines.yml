@@ -1,0 +1,32 @@
+trigger:
+- main
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
+- script: |
+    dotnet --info
+  displayName: 'Show .NET info'
+
+- task: PowerShell@2
+  displayName: 'Build API'
+  inputs:
+    filePath: 'build.ps1'
+    pwsh: true
+
+- task: PowerShell@2
+  displayName: 'Run Tests'
+  inputs:
+    filePath: 'test.ps1'
+    pwsh: true
