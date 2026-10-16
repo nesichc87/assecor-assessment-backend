@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Thanks to DI, the data source can easily be replaced later
 // (e.g. database, external service) without changing controllers.
 builder.Services.AddSingleton<IPersonRepository>(
-    new CsvPersonRepository("sample-input.csv")
+    new CsvPersonRepository(Path.Combine(AppContext.BaseDirectory, "Data", "sample-input.csv"))
 );
 
 // ------------------------------------------------------------
