@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using PersonsApi.Core;
 
 namespace PersonsApi.Infrastructure
@@ -13,15 +15,18 @@ namespace PersonsApi.Infrastructure
     public class CsvPersonRepository : IPersonRepository
     {
         private readonly string _csvFilePath;
+        private readonly ILogger<CsvPersonRepository> _logger;
         private readonly List<Person> _inMemoryPersons = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvPersonRepository"/> class.
         /// </summary>
         /// <param name="csvFilePath">Path to the CSV file containing person records.</param>
-        public CsvPersonRepository(string csvFilePath)
+        /// <param name="logger">Optional logger; a warning is logged when the CSV file is missing.</param>
+        public CsvPersonRepository(string csvFilePath, ILogger<CsvPersonRepository>? logger = null)
         {
             _csvFilePath = csvFilePath;
+            _logger = logger ?? NullLogger<CsvPersonRepository>.Instance;
         }
 
         /// <summary>
@@ -32,6 +37,7 @@ namespace PersonsApi.Infrastructure
         {
             if (!File.Exists(_csvFilePath))
             {
+                _logger.LogWarning("CSV file '{CsvFilePath}' not found; returning only in-memory persons.", _csvFilePath);
                 return _inMemoryPersons;
             }
 

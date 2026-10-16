@@ -12,8 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Currently a CSV-based implementation is used.
 // Thanks to DI, the data source can easily be replaced later
 // (e.g. database, external service) without changing controllers.
-builder.Services.AddSingleton<IPersonRepository>(
-    new CsvPersonRepository(Path.Combine(AppContext.BaseDirectory, "Data", "sample-input.csv"))
+var csvPath = Path.Combine(AppContext.BaseDirectory, "Data", "sample-input.csv");
+
+// Fail fast: a missing CSV would otherwise silently yield an empty API.
+if (!File.Exists(csvPath))
+{
+    throw new FileNotFoundException("Person data CSV not found.", csvPath);
+}
+
+builder.Services.AddSingleton<IPersonRepository>(sp =>
+    new CsvPersonRepository(csvPath, sp.GetRequiredService<ILogger<CsvPersonRepository>>())
 );
 
 // ------------------------------------------------------------
@@ -65,3 +73,8 @@ app.MapControllers();
 
 // Starts the application
 app.Run();
+
+/// <summary>
+/// Application entry point; declared public so integration tests can use WebApplicationFactory.
+/// </summary>
+public partial class Program { }
