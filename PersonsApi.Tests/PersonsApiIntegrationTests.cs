@@ -53,3 +53,41 @@ public class PersonsApiIntegrationTests : IClassFixture<WebApplicationFactory<Pr
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }
+
+/// <summary>
+/// Startup behaviour when the configured CSV file is missing.
+/// </summary>
+public class PersonsApiStartupTests
+{
+    /// <summary>
+    /// Verifies that the app refuses to start (instead of serving an empty list) when the CSV is missing,
+    /// and that the error message names the offending path.
+    /// </summary>
+    [Fact]
+    public void Startup_MissingCsv_ShouldFailFastWithClearMessage()
+    {
+        const string missing = "Data/does-not-exist.csv";
+        using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(b => b.UseSetting("PersonsCsv:Path", missing));
+
+        var ex = Assert.Throws<FileNotFoundException>(() => factory.CreateClient());
+
+        Assert.Contains("does-not-exist.csv", ex.Message);
+        Assert.Contains("PersonsCsv:Path", ex.Message);
+    }
+
+    /// <summary>
+    /// Verifies that the CSV path can be overridden via configuration.
+    /// </summary>
+    [Fact]
+    public async Task Startup_ConfiguredCsvPath_ShouldBeUsed()
+    {
+        using var factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(b => b.UseSetting("PersonsCsv:Path", Path.Combine("TestData", "persons.csv")));
+        var client = factory.CreateClient();
+
+        var persons = await client.GetFromJsonAsync<List<Person>>("/persons");
+
+        Assert.NotEmpty(persons!);
+    }
+}

@@ -12,12 +12,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Currently a CSV-based implementation is used.
 // Thanks to DI, the data source can easily be replaced later
 // (e.g. database, external service) without changing controllers.
-var csvPath = Path.Combine(AppContext.BaseDirectory, "Data", "sample-input.csv");
+// The CSV location is configurable (key "PersonsCsv:Path", e.g. via appsettings or the
+// PersonsCsv__Path environment variable). Relative paths are resolved against the
+// application's base directory, not the current working directory.
+var configuredPath = builder.Configuration["PersonsCsv:Path"];
+var csvPath = Path.Combine(
+    AppContext.BaseDirectory,
+    string.IsNullOrWhiteSpace(configuredPath) ? Path.Combine("Data", "sample-input.csv") : configuredPath);
 
 // Fail fast: a missing CSV would otherwise silently yield an empty API.
 if (!File.Exists(csvPath))
 {
-    throw new FileNotFoundException("Person data CSV not found.", csvPath);
+    throw new FileNotFoundException(
+        $"Person data CSV not found at '{csvPath}'. Set 'PersonsCsv:Path' (relative to '{AppContext.BaseDirectory}' or absolute) or make sure Data/sample-input.csv is copied to the output directory.",
+        csvPath);
 }
 
 builder.Services.AddSingleton<IPersonRepository>(sp =>
