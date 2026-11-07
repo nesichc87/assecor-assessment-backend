@@ -1,6 +1,6 @@
 using PersonsApi.Core;
 using PersonsApi.Infrastructure;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 // Creates the WebApplicationBuilder (configuration, logging, DI, hosting)
 var builder = WebApplication.CreateBuilder(args);

@@ -30,7 +30,7 @@ Start: Launch-Profil `PersonsApi` in `src/PersonsApi/Properties/launchSettings.j
 
 ## Konventionen
 
-- Zielframework: **net8.0** für API und Tests. Neue Projekte ebenfalls auf net8.0 legen.
+- Zielframework: **net10.0** (LTS) für API und Tests. Neue Projekte ebenfalls auf net10.0 legen.
 - `Nullable` und `ImplicitUsings` sind aktiv. In der API gilt `TreatWarningsAsErrors` – Build muss warnungsfrei sein.
 - `GenerateDocumentationFile` ist an: öffentliche Typen und Member bekommen XML-Doc-Kommentare (`/// <summary>`).
 - Datenzugriff nur über `IPersonRepository`, per Dependency Injection in `Program.cs` registriert. Controller kennen keine konkrete Datenquelle.
